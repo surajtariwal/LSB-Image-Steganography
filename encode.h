@@ -35,7 +35,7 @@ typedef struct _EncodeInfo
     char *stego_image_fname;
     FILE *fptr_stego_image;
 
-    char magic[20];
+    char magic[50];
 } EncodeInfo;
 
 
@@ -65,10 +65,11 @@ uint get_file_size(FILE *fptr);
 /* Copy bmp image header */
 Status copy_bmp_header(FILE *fptr_src_image, FILE *fptr_dest_image);
 
+/* Encode size of magic string */
+Status encode_size_magic_string(EncodeInfo *encInfo);
+
 /* Store Magic String */
 Status encode_magic_string(EncodeInfo *encInfo);
-
-Status save_magic_to_file(EncodeInfo *encInfo);
 
 /*Encode secret file extension size*/
 Status encode_secret_file_ext_size(int size, EncodeInfo *encInfo);
@@ -94,5 +95,6 @@ Status encode_size_to_lsb(long data, char *image_buffer);
 /* Copy remaining image bytes from src to stego image after encoding */
 Status copy_remaining_img_data(EncodeInfo *encInfo);
 
+/*Close all files after encoding */
 Status close_all_files(EncodeInfo *encInfo);
 #endif

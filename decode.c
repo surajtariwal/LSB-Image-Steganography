@@ -39,6 +39,15 @@ Status do_decoding(DecodeInfo *decInfo)
         return e_failure;
     }
 
+    if(decode_size_of_magic_string(decInfo)==e_success)
+    {
+        printf("Size of magic string decoded successfully\n");
+    }
+    else
+    {
+        printf("Size of magic string decoding failed\n");
+        return e_failure;
+    }
     if(decode_magic_string(decInfo)==e_success)
     {
         printf("Magic string decoded successfully\n");
@@ -122,35 +131,22 @@ Status open_files_decode(DecodeInfo *decInfo)
     fseek(decInfo->fptr_stego_image,54,SEEK_SET);
     return e_success;
 }
+Status decode_size_of_magic_string(DecodeInfo *decInfo)
+{
+    char imagebuffer[32];
+    fread(imagebuffer,32,1,decInfo->fptr_stego_image);
+    decInfo->magic_string_size = decode_size_from_lsb(imagebuffer);
+    printf("Size of magic string is : %ld\n",decInfo->magic_string_size);
+
+    return e_success;
+}
 Status decode_magic_string(DecodeInfo *decInfo)
 {
-    FILE *fptr=fopen("magic.txt","r");
-    if(fptr==NULL)
-    {
-        perror("fopen");
-        fprintf(stderr,"magic.txt file not found\n");
-        return e_failure;
-    }
-
-    char magic_string_from_user[50];
-    fscanf(fptr," %[^\n]",magic_string_from_user);
-    fclose(fptr);
-
     char decode_magic_from_user[50];
-    decode_data_from_image(decode_magic_from_user, strlen(magic_string_from_user), decInfo);
-    decode_magic_from_user[strlen(magic_string_from_user)] = '\0';
+    decode_data_from_image(decode_magic_from_user, decInfo->magic_string_size, decInfo);
+    decode_magic_from_user[decInfo->magic_string_size] = '\0';
 
-    if(strcmp(magic_string_from_user, decode_magic_from_user)==0)
-    {
-        printf("Magic string decoded successfully\n");
-        printf("Magic string entered by user ' %s' is equal to the string which is decoded '%s'\n",magic_string_from_user, decode_magic_from_user);
-    }
-    else
-    {
-        printf("Magic string is not same\n");
-        return e_failure;
-    }
-
+    printf("Decoded string is ''%s''\n",decode_magic_from_user);
     return e_success;
 }
 

@@ -7,6 +7,15 @@ OperationType check_operation_type(char *argv[]);
 
 int main(int argc, char *argv[])
 {
+    if(argc < 3)
+    {
+        printf("Error : Missing arguements for encoding\n");
+        printf("Pass correct arguements\n");
+        printf("./a.out -e beautiful.bmp secret.txt --> for encoding\n");
+        printf("./a.out -d stego.bmp --> for decoding\n");
+
+        return e_failure;
+    }
     if(check_operation_type(argv)==e_encode)
     {
         printf("You have choosed encoding\n");

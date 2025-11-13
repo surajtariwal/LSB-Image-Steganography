@@ -41,6 +41,15 @@ Status read_and_validate_encode_args(char *argv[], EncodeInfo *encInfo)
         encInfo -> stego_image_fname = "stego.bmp";
     }
 
+    if(argv[2] == NULL || argv[3] == NULL || argv[4] == NULL)
+    {
+        printf("Error : Missing arguements for encoding\n");
+        printf("Pass correct arguements\n");
+        printf("./a.out -e beautiful.bmp secret.txt --> for encoding\n");
+        printf("./a.out -d stego.bmp --> for decoding\n");
+    }
+    
+
     return e_success;
 }
 //If reading and validating the encode arguements is successfull then perform encoding operation 
@@ -75,7 +84,17 @@ Status do_encoding(EncodeInfo *encInfo)
         printf("Header copy un-successful\n");
         return e_failure;
     }
-
+    
+    if(encode_size_magic_string(encInfo)==e_success)
+    {
+        printf("Size of magic string is encoded successfully\n");
+    }
+    else
+    {
+        printf("Size of magic string is not encoded\n");
+        return e_failure;
+    }
+    
     if(encode_magic_string(encInfo)==e_success)
     {
         printf("Magic string encoded successfully\n");
@@ -83,16 +102,6 @@ Status do_encoding(EncodeInfo *encInfo)
     else
     {
         printf("Magic string encoding un-successfull\n");
-        return e_failure;
-    }
-
-    if(save_magic_to_file(encInfo)==e_success)
-    {
-        printf("Magic string is saved in file\n");
-    }
-    else
-    {
-        printf("Magic string is not saved in file\n");
         return e_failure;
     }
 
@@ -212,21 +221,6 @@ Status check_capacity(EncodeInfo *encInfo)
     }
     return e_success;
 }
-Status save_magic_to_file(EncodeInfo *encInfo)
-{
-    FILE *fptr = fopen("magic.txt","w");
-    if(fptr==NULL)
-    {
-        perror("fopen");
-        fprintf(stderr,"Unable to open magic.txt file\n");
-        return e_failure;
-    }
-
-    fprintf(fptr,"%s\n",encInfo->magic);
-    fclose(fptr);
-
-    return e_success;
-}
 uint get_file_size(FILE *fptr)
 {
     long cur_size = ftell(fptr);
@@ -260,6 +254,19 @@ Status copy_bmp_header(FILE *fptr_src_image, FILE *fptr_dest_image)
     fread(buffer,54,1,fptr_src_image);
     fwrite(buffer,54,1,fptr_dest_image);
     //54 header bytes are copied into buffer and written in stego.bmp image
+    return e_success;
+}
+Status encode_size_magic_string(EncodeInfo *encInfo)
+{
+    char imagebuffer[32];
+    int len = strlen(encInfo->magic);
+
+    fread(imagebuffer,32,1,encInfo->fptr_src_image);
+    encode_size_to_lsb(len,imagebuffer);
+    fwrite(imagebuffer,32,1,encInfo->fptr_stego_image);
+
+    printf("Size of magic string is encoded successfully is : %d\n",len);
+
     return e_success;
 }
 Status encode_magic_string(EncodeInfo *encInfo)
